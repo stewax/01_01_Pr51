@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="Word_kazakov.Elements.Owner"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Word_kazakov.Elements"
+             mc:Ignorable="d" 
+             FontFamily="Bahnschrift Light">
+    <Grid>
+        <Image VerticalAlignment="Top" HorizontalAlignment="Left" Width="30" Height="30"
+            Margin="10" Source="/Images/man.png"/>
+
+        <Label x:Name="NameOwner" Margin="45,0,10,0" VerticalAlignment="Top" VerticalContentAlignment="Center"
+        Content="Ощепков Александр Олегович" Height="50" />
+    </Grid>
+</UserControl>
