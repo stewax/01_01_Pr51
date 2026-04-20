@@ -27,20 +27,29 @@ namespace Word_kazakov
             InitializeComponent();
             LoadRooms();
         }
+        public void LoadRooms()
+        {
+            for (int i = 1; i < 20; i++)
+                Parent.Children.Add(new Elements.Room(i));
+        }
 
         private void Report(object sender, RoutedEventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Word Files (*.docx)|*.docx";
+            sfd.Filter = "Word Files (*.pdf)|*.pdf";
             sfd.ShowDialog();
             if (sfd.FileName != "")
                 OwnerContext.Report(sfd.FileName);
         }
 
-        public void LoadRooms()
+
+        private void ReportPDF(object sender, RoutedEventArgs e)
         {
-            for (int i = 1; i < 20; i++)
-                Parent.Children.Add(new Elements.Room(i));
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Word Files (*.docx)|*.docx";
+            sfd.ShowDialog();
+            if (sfd.FileName != "")
+                OwnerContext.ReportPDF(sfd.FileName);
         }
     }
 }
