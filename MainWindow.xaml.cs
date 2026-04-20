@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Word_kazakov.Context;
 
+
 namespace Word_kazakov
 {
     /// <summary>
@@ -36,7 +37,7 @@ namespace Word_kazakov
         private void Report(object sender, RoutedEventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Word Files (*.pdf)|*.pdf";
+            sfd.Filter = "Word Files (*.docx)|*.docx";
             sfd.ShowDialog();
             if (sfd.FileName != "")
                 OwnerContext.Report(sfd.FileName);
@@ -46,10 +47,34 @@ namespace Word_kazakov
         private void ReportPDF(object sender, RoutedEventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Word Files (*.docx)|*.docx";
-            sfd.ShowDialog();
-            if (sfd.FileName != "")
-                OwnerContext.ReportPDF(sfd.FileName);
+            sfd.Filter = "PDF Files (*.pdf)|*.pdf";
+            sfd.DefaultExt = "pdf";
+            sfd.FileName = "Отчет_Жильцы";
+
+            if (sfd.ShowDialog() == true)
+            {
+                string filePath = sfd.FileName;
+
+                try
+                {
+                    OwnerContext.ReportPDF(filePath);
+
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.Threading.Thread.Sleep(100);
+
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = filePath,
+                            UseShellExecute = true
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка: {ex.Message}");
+                }
+            }
         }
     }
 }

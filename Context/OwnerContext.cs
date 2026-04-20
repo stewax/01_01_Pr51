@@ -1,6 +1,11 @@
 ﻿using Microsoft.Office.Interop.Word;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
+using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -12,6 +17,27 @@ namespace Word_kazakov.Context
 {
     public class OwnerContext : Owner
     {
+        public class MyFontResolver : IFontResolver
+        {
+            public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+            {
+                if (familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (isBold) return new FontResolverInfo("Arial#b");
+                    return new FontResolverInfo("Arial#");
+                }
+                return null;
+            }
+
+            public byte[] GetFont(string faceName)
+            {
+                string fontPath = faceName.Contains("b")
+                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arialbd.ttf")
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
+                return File.ReadAllBytes(fontPath);
+            }
+        }
+
         public OwnerContext(string FirstName, string LastName, string SureName, int NumberRoom) : base (FirstName, LastName, SureName, NumberRoom) { }
 
         public static List<OwnerContext> AllOwners()
@@ -98,6 +124,85 @@ namespace Word_kazakov.Context
             doc.SaveAs2(fileName);
             doc.Close();
             app.Quit();
+        }
+
+        public static void ReportPDF(string fileName)
+        {
+            if (GlobalFontSettings.FontResolver == null)
+                GlobalFontSettings.FontResolver = new MyFontResolver();
+
+            string fullPath = Path.GetFullPath(fileName);
+
+            using (PdfDocument document = new PdfDocument())
+            {
+                document.Info.Title = "Отчёт по жильцам дома";
+
+                PdfPage page = document.AddPage();
+
+                using (XGraphics gfx = XGraphics.FromPdfPage(page))
+                {
+                    int marginTop = 20;
+                    int marginLeft = 50;
+
+                    XFont fontHeader = new XFont("Arial", 16, XFontStyleEx.Bold);
+                    XFont font = new XFont("Arial", 12, XFontStyleEx.Regular);
+
+                    gfx.DrawString("Список жильцов дома", fontHeader, XBrushes.Black,
+                        new XRect(0, marginTop, page.Width, 15),
+                        XStringFormats.Center);
+
+                    gfx.DrawString("по адресу: г. Пермь, ул. Луначарского, д. 24", font, XBrushes.Black,
+                        new XRect(0, marginTop + 30, page.Width, 10),
+                        XStringFormats.Center);
+
+                    var owners = AllOwners();
+
+                    gfx.DrawString($"Всего жильцов: {owners.Count}", font, XBrushes.Black,
+                        new XRect(marginLeft, marginTop + 70, page.Width, 10),
+                        XStringFormats.CenterLeft);
+
+                    int Width = (Convert.ToInt32(page.Width.Value) - marginLeft * 2 - 30) / 4;
+
+                    XSolidBrush headerBrush = new XSolidBrush(XColors.LightGray);
+
+                    gfx.DrawRectangle(headerBrush, marginLeft, marginTop + 100, Width, 20);
+                    gfx.DrawRectangle(headerBrush, marginLeft + Width + 10, marginTop + 100, Width, 20);
+                    gfx.DrawRectangle(headerBrush, marginLeft + (Width + 10) * 2, marginTop + 100, Width, 20);
+                    gfx.DrawRectangle(headerBrush, marginLeft + (Width + 10) * 3, marginTop + 100, Width, 20);
+
+                    gfx.DrawString("№", font, XBrushes.Black,
+                        new XRect(marginLeft, marginTop + 100, Width, 20), XStringFormats.Center);
+                    gfx.DrawString("Фамилия", font, XBrushes.Black,
+                        new XRect(marginLeft + Width + 10, marginTop + 100, Width, 20), XStringFormats.Center);
+                    gfx.DrawString("Имя", font, XBrushes.Black,
+                        new XRect(marginLeft + (Width + 10) * 2, marginTop + 100, Width, 20), XStringFormats.Center);
+                    gfx.DrawString("Отчество", font, XBrushes.Black,
+                        new XRect(marginLeft + (Width + 10) * 3, marginTop + 100, Width, 20), XStringFormats.Center);
+
+                    for (int i = 0; i < owners.Count; i++)
+                    {
+                        int yPos = marginTop + 100 + 25 * (i + 1);
+
+                        gfx.DrawRectangle(headerBrush, marginLeft, yPos, Width, 20);
+                        gfx.DrawRectangle(headerBrush, marginLeft + Width + 10, yPos, Width, 20);
+                        gfx.DrawRectangle(headerBrush, marginLeft + (Width + 10) * 2, yPos, Width, 20);
+                        gfx.DrawRectangle(headerBrush, marginLeft + (Width + 10) * 3, yPos, Width, 20);
+
+                        gfx.DrawString((i + 1).ToString(), font, XBrushes.Black,
+                            new XRect(marginLeft, yPos, Width, 20), XStringFormats.Center);
+
+                        gfx.DrawString(owners[i].LastName, font, XBrushes.Black,
+                            new XRect(marginLeft + Width + 10, yPos, Width, 20), XStringFormats.Center);
+
+                        gfx.DrawString(owners[i].FirstName, font, XBrushes.Black,
+                            new XRect(marginLeft + (Width + 10) * 2, yPos, Width, 20), XStringFormats.Center);
+
+                        gfx.DrawString(owners[i].SureName, font, XBrushes.Black,
+                            new XRect(marginLeft + (Width + 10) * 3, yPos, Width, 20), XStringFormats.Center);
+                    }
+                }
+                document.Save(fullPath);
+            } 
         }
 
         private static void FillCell(Word.Cell cell, string text, bool isBold = false)
