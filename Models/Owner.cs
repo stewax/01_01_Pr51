@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Word_kazakov.Models
+namespace Word_Osennikov.Models
 {
     public class Owner
     {

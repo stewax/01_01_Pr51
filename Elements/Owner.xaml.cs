@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Word_kazakov.Elements
+namespace Word_Osennikov.Elements
 {
     /// <summary>
     /// Логика взаимодействия для Owner.xaml

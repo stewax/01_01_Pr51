@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Word_kazakov.Properties
+namespace Word_Osennikov.Properties
 {
 
 

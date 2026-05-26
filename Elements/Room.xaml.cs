@@ -12,9 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Word_kazakov.Context;
+using Word_Osennikov.Context;
 
-namespace Word_kazakov.Elements
+namespace Word_Osennikov.Elements
 {
     /// <summary>
     /// Логика взаимодействия для Room.xaml
